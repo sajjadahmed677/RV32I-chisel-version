@@ -1,5 +1,5 @@
 `timescale 1ns/10ps
-
+`include "Ibtida_top_dffram_cv.lvs.powered.v"
 module UART_RX_TB();
 
   // Testbench uses a 25 MHz clock (same as Go Board)
@@ -40,11 +40,15 @@ module UART_RX_TB();
   endtask // UART_WRITE_BYTE
   
   
-  Ibtida_top_dffram_cv Ibtida
-    (.clock(r_Clock),
-     .reset(r_Reset),
-     .io_rx_i(r_RX_Serial),
-     .io_CLK_PER_BIT(c_CLKS_PER_BIT)
+  Ibtida_top_dffram_cv ibtida
+    (.wb_clk_i(r_Clock),
+     .wb_rst_i(r_Reset),
+     .io_in[5](r_RX_Serial),
+     .la_data_in[47:32](c_CLKS_PER_BIT),
+     .la_data_out(),
+     .la_oen(),
+     .io_out(),
+     .io_oeb()
      );
   
   always

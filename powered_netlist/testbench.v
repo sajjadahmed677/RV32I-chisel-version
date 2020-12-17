@@ -1,19 +1,98 @@
-`timescale 1ns/10ps
-`include "Ibtida_top_dffram_cv.lvs.powered.v"
-module UART_RX_TB();
+`timescale 1 ns/1 ps
+`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/Ibtida_top_dffram_cv.v"
+`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
+`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
+//`include "/home/zainrizkhan/pdks"
+//nclude "~/RV32I-chisel-version/powered_netlist/sky130A/"
+//nclude "/home/merlproj/backend-tools/pdks/sky130A/"
+
+
+//`define UNIT_DELAY #1
+
+//`ifdef SIM
+
+//`define USE_POWER_PINS
+
+/* NOTE: Need to pass the PDK root directory to iverilog with option -I */
+
+/*`include "/home/hamza52/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v"
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io.v"
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io__gpiov2_pad_wrapped.v"
+
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/primitives.v"
+`include "/home/hamza52/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/sky130_fd_sc_hvl.v"
+*/
+
+/*`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v"
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io.v"
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io__gpiov2_pad_wrapped.v"
+
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/primitives.v"
+`include "/home/hamza52/projects/efabless/tech/SW/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/sky130_fd_sc_hvl.v"
+*/
+
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_io/verilog/sky130_fd_io.v"
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io.v"
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_io/verilog/sky130_ef_io__gpiov2_pad_wrapped.v"
+
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/primitives.v"
+//`include "/home/merlproj/backend-tools/pdks/sky130A/libs.ref/sky130_fd_sc_hvl/verilog/sky130_fd_sc_hvl.v"
+
+/*`ifdef GL
+        `include "gl/mgmt_core.v"
+`else
+        `include "mgmt_soc.v"
+        `include "housekeeping_spi.v"
+        `include "caravel_clocking.v"
+        `include "mgmt_core.v"
+`endif
+*/
+
+module main();
 
   // Testbench uses a 25 MHz clock (same as Go Board)
   // Want to interface to 115200 baud UART
   // 25000000 / 115200 = 217 Clocks Per Bit.
   parameter c_CLOCK_PERIOD_NS = 40;
   parameter c_BIT_PERIOD      = 8600;
-  
+  parameter FILENAME= "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/program.hex";
   wire [15:0] c_CLKS_PER_BIT = 16'd217;
   reg r_Clock = 0;
   reg r_Reset = 0;
   reg r_RX_Serial = 1;
   wire [7:0] w_RX_Byte;
-  
+  wire [127:0] la_oen;
+  reg [31:0] INSTR[99:0];
+  integer instr_count = 0;
+      
+      initial begin
+        $readmemh(FILENAME,INSTR);
+      end
+
+  assign la_oen = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  wire [37:0]io_oeb;
+  wire [37:0]io_out;
+  wire [127:0]la_data_out;
+
+  Ibtida_top_dffram_cv ibtida
+    (
+     .wb_clk_i(r_Clock),
+     .wb_rst_i(r_Reset),
+     .io_in({32'h00000000,r_RX_Serial,5'b00000}),
+     .la_data_in({80'h00000000000000000000,c_CLKS_PER_BIT,32'h00000000}),
+     .la_data_out(la_data_out),
+     .la_oen(la_oen),
+     .io_out(io_out),
+     .io_oeb(io_oeb),
+     .VPWR(1'b1),
+     .VGND(1'b0)
+  );
 
   // Takes in input byte and serializes it 
   task UART_WRITE_BYTE;
@@ -21,6 +100,7 @@ module UART_RX_TB();
     integer     ii;
     begin
       
+
       // Send Start Bit
       r_RX_Serial <= 1'b0;
       #(c_BIT_PERIOD);
@@ -38,18 +118,7 @@ module UART_RX_TB();
       #(c_BIT_PERIOD);
      end
   endtask // UART_WRITE_BYTE
-  
-  
-  Ibtida_top_dffram_cv ibtida
-    (.wb_clk_i(r_Clock),
-     .wb_rst_i(r_Reset),
-     .io_in[5](r_RX_Serial),
-     .la_data_in[47:32](c_CLKS_PER_BIT),
-     .la_data_out(),
-     .la_oen(),
-     .io_out(),
-     .io_oeb()
-     );
+
   
   always
     #(c_CLOCK_PERIOD_NS/2) r_Clock <= !r_Clock;
@@ -63,14 +132,19 @@ module UART_RX_TB();
       #500
       r_Reset=0;
       // Send a command to the UART (exercise Rx)
-      @(posedge r_Clock);
-      UART_WRITE_BYTE(8'h13);
-      @(posedge r_Clock);
-      UART_WRITE_BYTE(8'h00);
-      @(posedge r_Clock);
-      UART_WRITE_BYTE(8'h00);
-      @(posedge r_Clock);
-      UART_WRITE_BYTE(8'h00);
+    while(instr_count<99 && INSTR[instr_count]!=32'h00000FFF)begin
+        @(posedge r_Clock);
+        UART_WRITE_BYTE(INSTR[instr_count][7:0]);
+        @(posedge r_Clock);
+        UART_WRITE_BYTE(INSTR[instr_count][15:8]);
+        @(posedge r_Clock);
+        UART_WRITE_BYTE(INSTR[instr_count][23:16]);
+        @(posedge r_Clock);
+        UART_WRITE_BYTE(INSTR[instr_count][31:24]);
+        @(posedge r_Clock);
+        instr_count = instr_count + 1'b1;
+
+    end      
       @(posedge r_Clock);
       UART_WRITE_BYTE(8'hff);
       @(posedge r_Clock);
@@ -78,11 +152,15 @@ module UART_RX_TB();
       @(posedge r_Clock);
       UART_WRITE_BYTE(8'h00);
       @(posedge r_Clock);
-      UART_WRITE_BYTE(8'h00);      
+      UART_WRITE_BYTE(8'h00);
       // Check that the correct command was received
-      
+
       $display("Executed");
-      
+            repeat (3) begin
+			 repeat (1000) @(posedge r_Clock);
+			 $display("+1000 cycles");
+		end
+
     $finish();
     end
   
@@ -94,3 +172,4 @@ module UART_RX_TB();
   end
   
 endmodule
+

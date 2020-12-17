@@ -1,7 +1,7 @@
 `timescale 1 ns/1 ps
-`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/Ibtida_top_dffram_cv.v"
-`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
-`include "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
+`include "/home/merl/github_repos/RV32I-chisel-version/powered_netlist/Ibtida_top_dffram_cv.v"
+`include "/home/merl/github_repos/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v"
+`include "/home/merl/github_repos/RV32I-chisel-version/powered_netlist/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v"
 //`include "/home/zainrizkhan/pdks"
 //nclude "~/RV32I-chisel-version/powered_netlist/sky130A/"
 //nclude "/home/merlproj/backend-tools/pdks/sky130A/"
@@ -59,10 +59,10 @@ module main();
   // Testbench uses a 25 MHz clock (same as Go Board)
   // Want to interface to 115200 baud UART
   // 25000000 / 115200 = 217 Clocks Per Bit.
-  parameter c_CLOCK_PERIOD_NS = 40;
+  parameter c_CLOCK_PERIOD_NS = 100;
   parameter c_BIT_PERIOD      = 8600;
-  parameter FILENAME= "/home/sajjad/Desktop/RV32I-chisel-version/powered_netlist/program.hex";
-  wire [15:0] c_CLKS_PER_BIT = 16'd217;
+  parameter FILENAME= "/home/merl/github_repos/RV32I-chisel-version/powered_netlist/program.hex";
+  wire [15:0] c_CLKS_PER_BIT = 16'd87;
   reg r_Clock = 0;
   reg r_Reset = 0;
   reg r_RX_Serial = 1;
@@ -156,7 +156,7 @@ module main();
       // Check that the correct command was received
 
       $display("Executed");
-            repeat (3) begin
+            repeat (4) begin
 			 repeat (1000) @(posedge r_Clock);
 			 $display("+1000 cycles");
 		end

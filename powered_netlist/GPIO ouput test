@@ -1,0 +1,37 @@
+trap_handler_start:
+    lw x11, 0xc(x16)
+    addi x2, x0, 1
+    sw x0, 4(x16)    # disabling interrupts
+    sw x2, 0(x16)    # clearing the interrupt flag
+    wait_for_interrupt_to_end:
+    lw x3, 0(x16)
+    bne x3, x0, wait_for_interrupt_to_end
+    add x0,x0,x0    # replace this inst with mret inst
+    nop
+    nop
+    nop
+    nop
+trap_handler_end:
+#vector_table_start:
+jal trap_handler_start
+#vector_table_end:
+# program memory start
+_start:
+li x16, 0x40010000    # GPIO base address
+li x3,1
+li x10,1
+sw x3, 0x4(x16)         # enabling interrupt on pin 0 [pin 8 in caravel]
+sw x10, 0x28(x16)       # enabling INTR_RISING event on pin 0 [pin 8 in caravel]
+sw x3, 0x1c(x16)        # setting gpio direction of pin 0 [pin 8 in caravel] to output
+sw x3, 0x10(x16)        # setting pin 0 [pin 8 in caravel] to HIGH
+sw x0, 0x1c(x16)        # setting gpio direction of pin 0 [pin 8 in caravel] to input
+li x5, 0x1
+wait_for_interrupt:
+        lw x4, 0x0(x16)
+    bne x4, x5, wait_for_interrupt
+addi x15, x0, 1
+sw x15, 0x1c(x16)
+sw x0, 0x10(x16)
+end:
+jal end
+

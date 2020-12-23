@@ -84,7 +84,7 @@ module main();
     (
      .wb_clk_i(r_Clock),
      .wb_rst_i(r_Reset),
-     .io_in({32'h00000000,r_RX_Serial,5'b00000}),
+     .io_in({28'h0000000,4'b0100,r_RX_Serial,5'b00000}),
      .la_data_in({80'h00000000000000000000,c_CLKS_PER_BIT,32'h00000000}),
      .la_data_out(la_data_out),
      .la_oen(la_oen),
@@ -156,7 +156,7 @@ module main();
       // Check that the correct command was received
 
       $display("Executed");
-            repeat (4) begin
+            repeat (6) begin
 			 repeat (1000) @(posedge r_Clock);
 			 $display("+1000 cycles");
 		end

@@ -75,7 +75,7 @@ module main();
         $readmemh(FILENAME,INSTR);
       end
 
-  assign la_oen = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+  assign la_oen = 128'hFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFse;
   wire [37:0]io_oeb;
   wire [37:0]io_out;
   wire [127:0]la_data_out;

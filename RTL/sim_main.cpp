@@ -27,7 +27,7 @@ int main(int argc, char **argv, char **env)
 
     top-> wb_rst_i = 1;
     top-> la_din = 87;
-    top-> la_oen = 0xffffffffffffffffffffffffffffffff
+    top-> la_oen = 0xFFFFFFFF;
 
     cout << "Starting simulation" << endl;
 
